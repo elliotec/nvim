@@ -61,8 +61,6 @@ Plug 'amix/vim-zenroom2'
 Plug 'junegunn/limelight.vim'
 " Customized vim startup screen
 Plug 'mhinz/vim-startify'
-" Rails highlighting etc
-Plug 'tpope/vim-rails'
 " Highlighting for styled-components like css in js files
 Plug 'styled-components/vim-styled-components'
 " Better JSON support
@@ -75,8 +73,6 @@ Plug 'tpope/vim-repeat'
 Plug 'hail2u/vim-css3-syntax'
 " CSS colors highlighted that very color
 Plug 'ap/vim-css-color'
-" Elixir
-Plug 'slashmili/alchemist.vim'
 " Use s{firstletter,secondletter} to move
 Plug 'justinmk/vim-sneak'
 " GraphQL support in js templates
