@@ -4,3 +4,4 @@ tmp/undo/*
 !tmp/undo/default.txt
 tmp/yank/*
 !tmp/yank/default.txt
+tmp/*

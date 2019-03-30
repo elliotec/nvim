@@ -11,7 +11,7 @@ Plug 'vim-scripts/YankRing.vim'
 " Use tab for insert mode completions
 Plug 'ervandew/supertab'
 " Async live linter
-Plug 'w0rp/ale'
+" Plug 'w0rp/ale'
 " Change syntax surroundings like parens or quotes
 Plug 'tpope/vim-surround'
 " Git gutter
@@ -77,6 +77,10 @@ Plug 'ap/vim-css-color'
 Plug 'justinmk/vim-sneak'
 " GraphQL support in js templates
 Plug 'jparise/vim-graphql'
+" Typescript syntax
+Plug 'HerringtonDarkholme/yats.vim'
+" typescript other stuff
+Plug 'mhartington/nvim-typescript', {'do': './install.sh'}
 call plug#end()
 " favorite colorscheme
 colorscheme molokai
