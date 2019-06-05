@@ -11,7 +11,7 @@ Plug 'vim-scripts/YankRing.vim'
 " Use tab for insert mode completions
 Plug 'ervandew/supertab'
 " Async live linter
-" Plug 'w0rp/ale'
+Plug 'w0rp/ale'
 " Change syntax surroundings like parens or quotes
 Plug 'tpope/vim-surround'
 " Git gutter
@@ -30,6 +30,8 @@ Plug 'Yggdroot/indentLine'
 Plug 'edkolev/tmuxline.vim'
 " Beautiful minimal simple status line that doesn't suck at all
 Plug 'itchyny/lightline.vim'
+" update lightline with linter status
+Plug 'maximbaz/lightline-ale'
 " Autocomplete html tags
 Plug 'mattn/emmet-vim'
 " Webapi is required for gist below
@@ -62,7 +64,7 @@ Plug 'junegunn/limelight.vim'
 " Customized vim startup screen
 Plug 'mhinz/vim-startify'
 " Highlighting for styled-components like css in js files
-Plug 'styled-components/vim-styled-components'
+Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
 " Better JSON support
 Plug 'elzr/vim-json'
 " Auto pair delimiters
@@ -138,21 +140,6 @@ set undolevels=500
 set undoreload=5000
 "show the column line at col 80
 set colorcolumn=80
-" don't skip underscores in words
-set iskeyword-=_
-" code folding by indentation
-set foldmethod=syntax
-" fold at column-level
-set foldcolumn=1
-" open at 20 levels deep fold
-set foldlevelstart=20
-" fold colors
-hi foldcolumn ctermbg=232
-hi folded ctermbg=232
-hi foldcolumn ctermfg=242
-hi folded ctermfg=242
-" hi Pmenu ctermfg=23 ctermbg=252
-" hi PmenuSel ctermfg=123 ctermbg=242
 "don't hide characters, like json quotes wtf
 let g:vim_json_syntax_conceal = 0
 " autocomplete relative paths from current buffer
@@ -161,12 +148,10 @@ let g:deoplete#file#enable_buffer_path = 1
 let mapleader = "\<Space>"
 "faster normal mode from insert mode
 inoremap jj <ESC>
-" do the git dance
-nnoremap <leader>gs :Gstatus<CR>
 "faster saving
 nnoremap <leader>w :w<CR>
-"jsx commenting
-nnoremap <leader>jc i{/*<space>*/}<esc>hhi
+"Ale go to def
+nnoremap <leader>d :ALEGoToDefinition<CR>
 "open NERDTree
 map <C-o> :NERDTreeToggle %:p:h<CR>
 "open Gundo
@@ -210,6 +195,8 @@ vnoremap <C-j> :m '>+1<CR>gv=gv
 vnoremap <C-k> :m '<-2<CR>gv=gv
 "distraction-free mode
 nnoremap <silent> <leader>z :Goyo<CR>
+" Clear search
+nmap <silent> // :nohlsearch<CR>
 "use the startified screen on startup
 autocmd User Startified setlocal cursorline
 " close popup window when cursor leaves or leaving insert mode
@@ -236,10 +223,11 @@ autocmd bufread,bufnewfile *.md,*.markdown call pencil#init({'wrap': 'soft'})
 let g:deoplete#enable_at_startup = 1
 " one space per level in NERDTree
 let g:NERDSpaceDelims = 1
-let g:ale_fixers = {'javascript': ['stylelint','eslint']}
+let g:ale_fixers = {'typescript': ['prettier'], 'javascript': ['eslint']}
 " ale settings for linting and statusline
 let g:ale_javascript_eslint_executable = 'eslint_d'
 let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
 let g:ale_sign_warning = '▲'
 let g:ale_sign_error = '✗'
 highlight link ALEWarningSign String
@@ -247,63 +235,44 @@ highlight link ALEErrorSign Title
 " go to next lint error
 nmap <silent> <leader>e <Plug>(ale_next_wrap)
 "lightline settings for status bar
-let g:tmuxline_powerline_separators = 0
 let g:lightline = {
       \ 'colorscheme': 'wombat',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
       \             [ 'fugitive', 'readonly', 'relativepath', 'modified' ] ],
       \  'right': [ [ 'lineinfo' ],
-      \             [ 'percent' ],
       \             [ 'filetype' ],
-      \             [ 'linter_warnings',
-      \             'linter_errors',
-      \              'linter_ok'] ]
+      \             [ 'linter_checking',
+      \               'linter_warnings',
+      \               'linter_errors',
+      \               'linter_ok'] ]
       \ },
       \ 'component': {
       \   'readonly': '%{&readonly?"x":""}',
       \   'fugitive': '%{exists("*fugitive#head")?fugitive#head():""}'
       \ },
-      \ 'component_expand': {
-      \   'linter_warnings': 'LightlineLinterWarnings',
-      \   'linter_errors': 'LightlineLinterErrors',
-      \   'linter_ok': 'LightlineLinterOK'
-      \ },
-      \ 'component_type': {
-      \   'linter_warnings': 'warning',
-      \   'linter_errors': 'error'
-      \ },
       \ 'component_visible_condition': {
       \   'fugitive': '(exists("*fugitive#head") && ""!=fugitive#head())'
+      \ },
+      \ 'component_expand': {
+      \   'linter_checking': 'lightline#ale#checking',
+      \   'linter_warnings': 'lightline#ale#warnings',
+      \   'linter_errors': 'lightline#ale#errors',
+      \   'linter_ok': 'lightline#ale#ok',
+      \ },
+      \ 'component_type': {
+      \   'linter_checking': 'left',
+      \   'linter_warnings': 'warning',
+      \   'linter_errors': 'error',
+      \   'linter_ok': 'left',
       \ },
       \ 'separator': { 'left': '', 'right': '' },
       \ 'subseparator': { 'left': '|', 'right': '|' }
       \ }
-function! LightlineLinterWarnings() abort
-  let l:counts = ale#statusline#Count(bufnr(''))
-  let l:all_errors = l:counts.error + l:counts.style_error
-  let l:all_non_errors = l:counts.total - l:all_errors
-  return l:counts.total == 0 ? '' : printf('%d ◆', all_non_errors)
-endfunction
-function! LightlineLinterErrors() abort
-  let l:counts = ale#statusline#Count(bufnr(''))
-  let l:all_errors = l:counts.error + l:counts.style_error
-  let l:all_non_errors = l:counts.total - l:all_errors
-  return l:counts.total == 0 ? '' : printf('%d ✗', all_errors)
-endfunction
-function! LightlineLinterOK() abort
-  let l:counts = ale#statusline#Count(bufnr(''))
-  let l:all_errors = l:counts.error + l:counts.style_error
-  let l:all_non_errors = l:counts.total - l:all_errors
-  return l:counts.total == 0 ? '✓ ' : ''
-endfunction
-autocmd User ALELint call s:MaybeUpdateLightline()
-" Update and show lightline but only if it's visible (e.g., not in Goyo)
-function! s:MaybeUpdateLightline()
-  if exists('#lightline')
-    call lightline#update()
-  end
-endfunction
+let g:lightline#ale#indicator_checking = "✓"
+let g:lightline#ale#indicator_warnings = "◆"
+let g:lightline#ale#indicator_errors = "✗"
+let g:lightline#ale#indicator_ok = "✓"
 " key map to expand emmet completion
 let g:user_emmet_expandabbr_key = '<c-y>'
 "don't conceal any syntax in markdown
@@ -350,8 +319,6 @@ endfun
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
 "actual codefolding that doesn't suck
-if has('conceal')
-  set conceallevel=2 concealcursor=niv
-endif
-" Clear search
-nmap <silent> // :nohlsearch<CR>
+" if has('conceal')
+"   set conceallevel=3 concealcursor=niv
+" endif
