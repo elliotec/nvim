@@ -90,7 +90,6 @@ colorscheme molokai
 set mouse=a
 " don't look at these filetypes
 set wildignore+=*.jpg,*.jpeg,*.gif,*.png,*.mov,*.pdf,*.psd,*.ai
-" don't look at these filetypes either
 set wildignore+=*.ppt,*.pptx,*.doc,*.docx,*.xls,*.xlsx
 " be able to copy from neovim to clipboard on mac and ubuntu
 set clipboard=unnamedplus
@@ -98,26 +97,22 @@ set clipboard=unnamedplus
 set autoread
 " show regular line numbers and not that silly relative number shit
 set number
-" if your search contains uppercase, search for it like that
+" if your search contains uppercase, search for it, otherwise ignore caseing
 set smartcase
-" if the search doesn't contain uppercase letter, ignore casing
 set ignorecase
 " don't show mode switching in the status bar
 set noshowmode
-" use spaces for tabs
-set expandtab
 " tab == 2 spaces
+set expandtab
 set shiftwidth=2
 set softtabstop=2
 set tabstop=2
-" indent by syntax
+" indent automatically by syntax
 set smartindent
-" indent automatically
 set autoindent
-" use those characters to show real tabs and trailing spaces
-set listchars=tab:--,trail:·
-" show the above chars
+" use characters to show real tabs and trailing spaces
 set list
+set listchars=tab:--,trail:·
 " scroll offset to start scroll at the number of lines set
 set scrolloff=8
 " auto completion from spelling dictionary
@@ -132,10 +127,10 @@ set backupdir=~/.config/nvim/tmp/backup//
 set undofile
 " undo files directory
 set undodir=~/.config/nvim/tmp/undo//
-" keep history of 500 undos
-set history=500
+" keep history of 200 undos
+set history=200
 " persistent undos
-set undolevels=500
+set undolevels=200
 " max # of lines per undo on buffer reload
 set undoreload=5000
 "show the column line at col 80
@@ -150,7 +145,7 @@ let mapleader = "\<Space>"
 inoremap jj <ESC>
 "faster saving
 nnoremap <leader>w :w<CR>
-"Ale go to def
+"Ale go to def -- use this more often
 nnoremap <leader>d :ALEGoToDefinition<CR>
 "open NERDTree
 map <C-o> :NERDTreeToggle %:p:h<CR>
@@ -176,7 +171,7 @@ nnoremap <silent> <leader>f :Ag <C-R><C-W><CR>
 "start Ag search
 nnoremap <leader>ag :Ag<space>
 " sorting selection shortcut
-vnoremap <leader>abc :sort<CR>
+vnoremap <leader>ab :sort<CR>
 "git status
 nnoremap <leader>gs :Gstatus<CR>
 "git commit
@@ -299,6 +294,7 @@ let g:user_emmet_settings = {
 \}
 " startify start screen config
 let g:startify_change_to_dir = 0
+let g:startify_change_to_vcs_root = 1
 let g:startify_custom_header =
         \ map(split(system('fortune -s | cowsay'), '\n'), '"   ". v:val') + ['']
 "gist creation settings
@@ -318,7 +314,4 @@ function! s:goyo_leave()
 endfun
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
-"actual codefolding that doesn't suck
-" if has('conceal')
-"   set conceallevel=3 concealcursor=niv
-" endif
+
