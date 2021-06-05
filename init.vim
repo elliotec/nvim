@@ -3,7 +3,7 @@ call plug#begin('~/.local/share/nvim/plugged')
 " Autocomplete list functionality
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins'}
 " Autocomplete with tern for JavaScript
-Plug 'carlitux/deoplete-ternjs'
+Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
 " Automatically handle swapfiles
 Plug 'gioele/vim-autoswap'
 " Keep list of yanks, use Ctrl-p to scroll through
@@ -47,10 +47,6 @@ Plug 'mxw/vim-jsx'
 " Fuzzy file finder - includes Ag for ack-like functionality
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
-" Better tabbing - required for vim-markdown
-Plug 'godlygeek/tabular'
-" Markdown highlighting and folding
-Plug 'plasticboy/vim-markdown'
 " For prose, soft vs hard line breaks, sane wrapping and undos, etc
 Plug 'reedes/vim-pencil'
 " Autocorrect common spelling errors
@@ -79,10 +75,6 @@ Plug 'ap/vim-css-color'
 Plug 'justinmk/vim-sneak'
 " GraphQL support in js templates
 Plug 'jparise/vim-graphql'
-" Typescript syntax
-Plug 'HerringtonDarkholme/yats.vim'
-" typescript other stuff
-Plug 'mhartington/nvim-typescript', {'do': './install.sh'}
 call plug#end()
 " favorite colorscheme
 colorscheme molokai
@@ -137,8 +129,6 @@ set undoreload=5000
 set colorcolumn=80
 "don't hide characters, like json quotes wtf
 let g:vim_json_syntax_conceal = 0
-" autocomplete relative paths from current buffer
-let g:deoplete#file#enable_buffer_path = 1
 "space is leader key
 let mapleader = "\<Space>"
 "faster normal mode from insert mode
@@ -168,6 +158,9 @@ nnoremap <leader>et :vsp ~/.tmux.conf<CR>
 nnoremap F :FZF<CR>
 "search project for word under cursor with Ag
 nnoremap <silent> <leader>f :Ag <C-R><C-W><CR>
+
+nnoremap <silent> <leader>k :call fzf#vim#files('.', {'options':'--query '.expand('<cword>')})<CR>
+
 "start Ag search
 nnoremap <leader>ag :Ag<space>
 " sorting selection shortcut
@@ -216,9 +209,13 @@ autocmd bufread,bufnewfile *.md,*.markdown call litecorrect#init()
 autocmd bufread,bufnewfile *.md,*.markdown call pencil#init({'wrap': 'soft'})
 "enable deoplete for code completion
 let g:deoplete#enable_at_startup = 1
+"Add extra filetypes
+let g:deoplete#sources#ternjs#filetypes = [
+                \ 'jsx',
+                \ ]
 " one space per level in NERDTree
 let g:NERDSpaceDelims = 1
-let g:ale_fixers = {'typescript': ['prettier'], 'javascript': ['eslint']}
+let g:ale_fixers = {'typescript': ['prettier'], 'javascript': ['prettier']}
 " ale settings for linting and statusline
 let g:ale_javascript_eslint_executable = 'eslint_d'
 let g:ale_fix_on_save = 1
@@ -230,6 +227,7 @@ highlight link ALEErrorSign Title
 " go to next lint error
 nmap <silent> <leader>e <Plug>(ale_next_wrap)
 "lightline settings for status bar
+let g:tmuxline_powerline_separators = 0
 let g:lightline = {
       \ 'colorscheme': 'wombat',
       \ 'active': {
@@ -270,10 +268,6 @@ let g:lightline#ale#indicator_errors = "✗"
 let g:lightline#ale#indicator_ok = "✓"
 " key map to expand emmet completion
 let g:user_emmet_expandabbr_key = '<c-y>'
-"don't conceal any syntax in markdown
-let g:vim_markdown_conceal = 0
-"highlight frontmatter in markdown
-let g:vim_markdown_frontmatter = 1
 " don't take too long for tern js completion
 let g:tern_request_timeout = 1
 " show indents lined up
@@ -314,4 +308,3 @@ function! s:goyo_leave()
 endfun
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
-
